@@ -1,0 +1,45 @@
+name: Memos Database Auto Backup
+
+on:
+  schedule:
+    # 每天北京时间早上 8 点运行一次 (UTC 时间 0 点)
+    - cron: '0 19 * * *'
+  # 支持手动点击按钮触发备份
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检查代码库
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 安装 Cloudflare Wrangler
+        run: npm install -g wrangler
+
+      - name: 从 Cloudflare D1 导出数据库
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          # 这里的 memos-worker-db 替换为你实际的 D1 数据库名称
+          # 生成带日期的文件名，如 backup-2026-04-19.sql
+          FILENAME="memos-backup-$(date +'%Y-%m-%d').sql"
+          wrangler d1 export memos-worker-db --remote --output "./$FILENAME"
+          echo "BACKUP_NAME=$FILENAME" >> $GITHUB_ENV
+
+      - name: 保存备份文件到 GitHub Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # 下载时的压缩包名字
+          name: ${{ env.BACKUP_NAME }}
+          # 要保存的文件路径
+          path: ./*.sql
+          # 备份保存天数（GitHub 默认 90 天，你可以改短）
+          retention-days: 90
