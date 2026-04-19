@@ -9,8 +9,8 @@ run_worker_first = [
 
 [[d1_databases]]
 binding = "DB"
-database_id = "YOUR_D1_DATABASE_ID"
-database_name = "YOUR_D1_DATABASE_NAME"
+database_id = "a7333d41-40aa-48dc-9266-610cc489cbb6"
+database_name = "memos-worker-db"
 
 [[kv_namespaces]]
 binding = "NOTES_KV"
