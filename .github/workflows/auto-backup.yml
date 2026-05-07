@@ -42,4 +42,4 @@ jobs:
           # 要保存的文件路径
           path: ./*.sql
           # 备份保存天数（GitHub 默认 90 天，你可以改短）
-          retention-days: 90
+          retention-days: 7
